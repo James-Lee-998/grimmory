@@ -1,0 +1,55 @@
+services:
+  grimmory:
+    # image: grimmory/grimmory:latest
+    # Convenience tag:
+    # image: grimmory/grimmory:<release-version>
+    # Alternative: ghcr.io/grimmory-tools/grimmory:<release-version>
+    # To build from source instead: comment out 'image' and uncomment below
+    build: .
+    container_name: grimmory
+    environment:
+      - USER_ID=${APP_USER_ID}
+      - GROUP_ID=${APP_GROUP_ID}
+      - TZ=${TZ}
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_USERNAME=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - API_DOCS_ENABLED=${API_DOCS_ENABLED}
+      - DISK_TYPE=${DISK_TYPE}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "6060:6060"
+    volumes:
+      - ./data:/app/data
+      - ./books:/books
+      - ./bookdrop:/bookdrop
+    healthcheck:
+      test: wget -q -O - http://localhost:6060/api/v1/healthcheck
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+    restart: unless-stopped
+
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:11.4.5
+    environment:
+      - PUID=${DB_USER_ID}
+      - PGID=${DB_GROUP_ID}
+      - TZ=${TZ}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./mariadb/config:/config
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
