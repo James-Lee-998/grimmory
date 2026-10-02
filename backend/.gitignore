@@ -35,6 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+.env
 
 ### Local scripts ###
 local/
+
+### mariadb outputs ###
+./mariadb/config/*
