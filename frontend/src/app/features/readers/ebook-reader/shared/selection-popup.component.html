@@ -24,6 +24,69 @@
       <app-reader-icon name="search" [size]="16"></app-reader-icon>
     </button>
 
+    @if (translation.enabled()) {
+      <div class="divider"></div>
+
+      <div class="annotation-container">
+        <button class="action-btn" [class.active]="showTranslation()" (click)="toggleTranslation()" [title]="t('translate')">
+          <app-reader-icon name="translate" [size]="16"></app-reader-icon>
+        </button>
+
+        <!-- Chinese text with tone-marked pinyin above each character. -->
+        <ng-template #rubyText let-segments>
+          @for (segment of segments; track $index) {
+            @if (segment.reading) {
+              <ruby>{{ segment.text }}<rt>{{ segment.reading }}</rt></ruby>
+            } @else {
+              {{ segment.text }}
+            }
+          }
+        </ng-template>
+
+        @if (showTranslation()) {
+          <div class="annotation-options translation-panel" [class.above]="!showBelow" [class.below]="showBelow">
+            <div class="translation-header">
+              <span>{{ t('translateTo') }}</span>
+              <!-- stopPropagation: the popup's mousedown preventDefault would otherwise stop the select opening. -->
+              <select
+                class="translation-target"
+                [attr.aria-label]="t('translateTo')"
+                [value]="translation.targetLanguage()"
+                (mousedown)="$event.stopPropagation()"
+                (change)="onTargetLanguageChange($any($event.target).value)">
+                @for (language of translationLanguages(); track language.code) {
+                  <option [value]="language.code" [selected]="language.code === translation.targetLanguage()">{{ language.name }}</option>
+                }
+              </select>
+            </div>
+            @if (selectionPinyin(); as segments) {
+              <p class="translation-text translation-pinyin translation-original">
+                <ng-container [ngTemplateOutlet]="rubyText" [ngTemplateOutletContext]="{$implicit: segments}" />
+              </p>
+            }
+            <div class="translation-body" aria-live="polite">
+              @if (translating()) {
+                <span class="translation-muted">{{ t('translating') }}</span>
+              } @else if (translationError()) {
+                <span class="translation-error">{{ translationError() }}</span>
+              } @else if (translationPinyin(); as segments) {
+                <p class="translation-text translation-pinyin">
+                  <ng-container [ngTemplateOutlet]="rubyText" [ngTemplateOutletContext]="{$implicit: segments}" />
+                </p>
+              } @else {
+                <p class="translation-text">{{ translatedText() }}</p>
+              }
+            </div>
+            @if (!translating() && !translationError() && translationSource()) {
+              <span class="translation-muted translation-source">
+                {{ t(translationAutoDetected() ? 'translatedFromDetected' : 'translatedFromBook', {language: languageName(translationSource())}) }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+    }
+
     <div class="divider"></div>
 
     <div class="annotation-container">

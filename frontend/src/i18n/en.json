@@ -1936,7 +1936,12 @@
     "queueErrorSummary": "Download failed to start",
     "pageInfo": "Page {{ page }} of {{ pages }} · {{ total }} books",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "first": "First",
+    "last": "Last",
+    "pageSize": "Rows per page",
+    "pagination": "Pages",
+    "goToPage": "Go to page {{ page }}"
   },
   "bookdrop": {
     "bulkEdit": {
@@ -3955,7 +3960,12 @@
       "addNote": "Add Note",
       "goToLink": "Go to Link",
       "removeLink": "Remove Link",
-      "deleteAnnotation": "Delete Annotation"
+      "deleteAnnotation": "Delete Annotation",
+      "translate": "Translate",
+      "translateTo": "Translate to",
+      "translating": "Translating…",
+      "translatedFromBook": "From {{ language }} (book language)",
+      "translatedFromDetected": "From {{ language }} (detected)"
     },
     "shortcutsHelp": {
       "title": "Keyboard Shortcuts",

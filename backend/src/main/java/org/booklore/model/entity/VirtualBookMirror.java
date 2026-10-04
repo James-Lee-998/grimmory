@@ -32,6 +32,10 @@ public class VirtualBookMirror {
     @Column(name = "provider")
     private Provider provider;
 
+    /** The provider's own ID for the book, e.g. the Gutenberg ebook number. */
+    @Column(name = "external_id", nullable = false)
+    private String externalId;
+
     @Column(name = "download_url")
     private String downloadUrl;
 

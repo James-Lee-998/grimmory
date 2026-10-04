@@ -18,5 +18,7 @@ spring:
   flyway:
     enabled: false
 app:
+  virtual-book-seed:
+    enabled: false
   bookdrop-folder: build/bookdrop
   path-config: build/app-data

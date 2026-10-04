@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public record VirtualBookDto(
+        Long id,
         Long virtualBookId,
         String title,
         String authors,
@@ -28,6 +29,7 @@ public record VirtualBookDto(
 
     public static VirtualBookDto from(VirtualBookEntity entity) {
         return new VirtualBookDto(
+                entity.getId(),
                 entity.getVirtualBookId(),
                 entity.getTitle(),
                 entity.getAuthors(),

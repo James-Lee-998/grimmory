@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild} from '@angular/core';
 import {HttpErrorResponse} from '@angular/common/http';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {MessageService} from '@openng/optimus-ui/api';
@@ -11,8 +11,10 @@ import {AppIconDirective} from '../../shared/components/icon/app-icon.directive'
 import {LibraryService} from '../book/service/library.service';
 import {VirtualBook, VirtualBookPage, VirtualBookService} from './virtual-book.service';
 
-const PAGE_SIZE = 25;
+const PAGE_SIZES = [25, 50, 100] as const;
 const SEARCH_DEBOUNCE_MS = 300;
+/** Page buttons shown either side of the current page before collapsing into an ellipsis. */
+const PAGE_WINDOW = 2;
 
 @Component({
   selector: 'app-virtual-books',
@@ -38,7 +40,11 @@ export class VirtualBooksComponent implements OnInit {
 
   protected readonly search = signal('');
   protected readonly pageIndex = signal(0);
+  protected readonly pageSize = signal<number>(PAGE_SIZES[0]);
+  protected readonly pageSizeOptions: SelectOption<number>[] = PAGE_SIZES.map(size => ({label: String(size), value: size}));
   protected readonly result = signal<VirtualBookPage | null>(null);
+
+  private readonly tableScroller = viewChild<ElementRef<HTMLElement>>('tableScroller');
   protected readonly loading = signal(false);
   protected readonly loadError = signal(false);
 
@@ -53,6 +59,22 @@ export class VirtualBooksComponent implements OnInit {
   protected readonly books = computed(() => this.result()?.content ?? []);
   protected readonly totalPages = computed(() => this.result()?.page.totalPages ?? 0);
   protected readonly totalElements = computed(() => this.result()?.page.totalElements ?? 0);
+
+  /** Page indexes to render as buttons; null marks a gap shown as an ellipsis. Always includes first and last. */
+  protected readonly pageButtons = computed<(number | null)[]>(() => {
+    const total = this.totalPages();
+    const current = this.pageIndex();
+    if (total <= 1) return total === 1 ? [0] : [];
+
+    const start = Math.max(1, current - PAGE_WINDOW);
+    const end = Math.min(total - 2, current + PAGE_WINDOW);
+    const buttons: (number | null)[] = [0];
+    if (start > 1) buttons.push(null);
+    for (let i = start; i <= end; i++) buttons.push(i);
+    if (end < total - 2) buttons.push(null);
+    buttons.push(total - 1);
+    return buttons;
+  });
 
   protected readonly destinationOptions = computed<SelectOption<number>[]>(() =>
     this.libraryService.libraries().flatMap(library =>
@@ -88,8 +110,15 @@ export class VirtualBooksComponent implements OnInit {
   }
 
   protected goToPage(index: number): void {
-    if (index < 0 || index >= this.totalPages()) return;
+    if (index < 0 || index >= this.totalPages() || index === this.pageIndex()) return;
     this.pageIndex.set(index);
+    this.load();
+  }
+
+  protected setPageSize(size: number | null): void {
+    if (size == null || size === this.pageSize()) return;
+    this.pageSize.set(size);
+    this.pageIndex.set(0);
     this.load();
   }
 
@@ -105,17 +134,17 @@ export class VirtualBooksComponent implements OnInit {
   }
 
   protected selectedMirror(book: VirtualBook): number | null {
-    return this.mirrorChoice()[book.virtualBookId] ?? book.mirrors[0]?.id ?? null;
+    return this.mirrorChoice()[book.id] ?? book.mirrors[0]?.id ?? null;
   }
 
   protected setMirror(book: VirtualBook, mirrorId: number | null): void {
     if (mirrorId == null) return;
-    this.mirrorChoice.update(choice => ({...choice, [book.virtualBookId]: mirrorId}));
+    this.mirrorChoice.update(choice => ({...choice, [book.id]: mirrorId}));
   }
 
   protected canDownload(book: VirtualBook): boolean {
     return !book.downloaded
-      && !this.queued().has(book.virtualBookId)
+      && !this.queued().has(book.id)
       && this.selectedMirror(book) != null
       && this.selectedDestination() != null;
   }
@@ -125,11 +154,11 @@ export class VirtualBooksComponent implements OnInit {
     const libraryPathId = this.selectedDestination();
     if (mirrorId == null || libraryPathId == null) return;
 
-    this.submitting.set(book.virtualBookId);
-    this.virtualBookService.download(book.virtualBookId, mirrorId, libraryPathId).subscribe({
+    this.submitting.set(book.id);
+    this.virtualBookService.download(book.id, mirrorId, libraryPathId).subscribe({
       next: () => {
         this.submitting.set(null);
-        this.queued.update(ids => new Set(ids).add(book.virtualBookId));
+        this.queued.update(ids => new Set(ids).add(book.id));
         this.messageService.add({
           severity: 'success',
           summary: this.transloco.translate('virtualBooks.queuedSummary'),
@@ -152,10 +181,11 @@ export class VirtualBooksComponent implements OnInit {
   private load(): void {
     this.loading.set(true);
     this.loadError.set(false);
-    this.virtualBookService.list(this.search(), this.pageIndex(), PAGE_SIZE).subscribe({
+    this.virtualBookService.list(this.search(), this.pageIndex(), this.pageSize()).subscribe({
       next: page => {
         this.result.set(page);
         this.loading.set(false);
+        this.tableScroller()?.nativeElement.scrollTo({top: 0});
       },
       error: () => {
         this.loadError.set(true);

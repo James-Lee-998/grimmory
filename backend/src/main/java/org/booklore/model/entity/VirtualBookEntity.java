@@ -23,6 +23,10 @@ public class VirtualBookEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Canonical ID derived from the normalised title, author and language (see CanonicalBookId), so every provider
+     * that carries the same book links its mirrors to the same row. Provider-specific IDs live on the mirrors.
+     */
     @Column(name = "virtual_book_id", nullable = false, unique = true)
     private Long virtualBookId;
 

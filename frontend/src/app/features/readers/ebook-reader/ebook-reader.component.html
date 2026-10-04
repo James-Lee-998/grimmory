@@ -76,6 +76,7 @@
     [overlappingAnnotationId]="selectionState().overlappingAnnotationId"
     [selectedText]="selectionState().selectedText"
     [linkUrl]="selectionState().linkUrl"
+    [sourceLanguage]="book()?.metadata?.language ?? null"
     (action)="handleSelectionAction($event)"
   ></app-text-selection-popup>
 

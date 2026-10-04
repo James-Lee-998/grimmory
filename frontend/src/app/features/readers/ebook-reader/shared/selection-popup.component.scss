@@ -244,3 +244,69 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--reader-chrome-accent) 50%, transparent);
   }
 }
+
+.translation-panel {
+  width: min(320px, calc(100vw - 32px));
+  align-items: stretch;
+}
+
+.translation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--reader-chrome-fg-secondary);
+}
+
+.translation-target {
+  max-width: 60%;
+  padding: 2px 6px;
+  border: 1px solid var(--reader-chrome-strong-border);
+  border-radius: 6px;
+  background: var(--reader-chrome-bg-raised);
+  color: var(--reader-chrome-fg);
+  font-size: 12px;
+}
+
+.translation-body {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--reader-chrome-fg);
+}
+
+.translation-text {
+  margin: 0;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+.translation-muted {
+  color: var(--reader-chrome-fg-muted);
+}
+
+.translation-error {
+  color: var(--color-red-400, #f87171);
+}
+
+.translation-source {
+  font-size: 11px;
+}
+
+// Pinyin is set as ruby text above each character; leave room for it between lines.
+.translation-pinyin {
+  line-height: 2.4;
+
+  rt {
+    font-size: 0.65em;
+    color: var(--reader-chrome-fg-secondary);
+    user-select: none;
+  }
+}
+
+.translation-original {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--reader-chrome-border);
+}

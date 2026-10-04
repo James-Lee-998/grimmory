@@ -16,6 +16,8 @@ public class AppProperties {
     private RemoteAuth remoteAuth;
     private OutboundRequests outbound;
     private OIDC oidc;
+    private VirtualBookSeed virtualBookSeed = new VirtualBookSeed();
+    private Translation translation = new Translation();
 
     /**
      * Type of disk storage where library files are stored.
@@ -48,6 +50,27 @@ public class AppProperties {
         private int connectTimeout = 15;
         private int readTimeout = 15;
         private List<String> restrictedRanges = List.of();
+    }
+
+    @Getter
+    @Setter
+    public static class VirtualBookSeed {
+        private boolean enabled = true;
+        /**
+         * Spring resource location of the Project Gutenberg catalog CSV (pg_catalog.csv), e.g. classpath:... or file:/path/books.csv.
+         * Files ending in .gz are decompressed on the fly.
+         */
+        private String location = "classpath:seed/gutenberg-catalog.csv.gz";
+    }
+
+    @Getter
+    @Setter
+    public static class Translation {
+        /** Base URL of a LibreTranslate server, e.g. http://libretranslate:5000. Translation is off when blank. */
+        private String libretranslateUrl;
+        /** Optional LibreTranslate API key, for servers started with --api-keys. Never sent to the browser. */
+        private String libretranslateApiKey;
+        private int maxTextLength = 2000;
     }
 
     @Getter

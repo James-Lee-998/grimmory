@@ -11,6 +11,8 @@ export interface VirtualBookMirror {
 }
 
 export interface VirtualBook {
+  id: number;
+  /** Canonical ID derived from title, author and language; shared by all providers of the same book. */
   virtualBookId: number;
   title: string;
   authors: string | null;
@@ -52,7 +54,7 @@ export class VirtualBookService {
     return this.http.get<VirtualBookPage>(this.url, {params});
   }
 
-  download(virtualBookId: number, mirrorId: number, libraryPathId: number): Observable<VirtualBookDownloadResponse> {
-    return this.http.post<VirtualBookDownloadResponse>(`${this.url}/${virtualBookId}/download`, {mirrorId, libraryPathId});
+  download(id: number, mirrorId: number, libraryPathId: number): Observable<VirtualBookDownloadResponse> {
+    return this.http.post<VirtualBookDownloadResponse>(`${this.url}/${id}/download`, {mirrorId, libraryPathId});
   }
 }

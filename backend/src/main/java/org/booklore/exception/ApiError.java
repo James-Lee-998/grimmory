@@ -68,6 +68,8 @@ public enum ApiError {
     OIDC_USER_NOT_PROVISIONED(HttpStatus.FORBIDDEN, "OIDC user '%s' is not provisioned and auto-provisioning is disabled"),
     OIDC_TOKEN_EXCHANGE_FAILED(HttpStatus.BAD_GATEWAY, "Failed to exchange authorization code: %s"),
     OIDC_PROVIDER_UNREACHABLE(HttpStatus.BAD_GATEWAY, "Cannot reach OIDC provider: %s"),
+    TRANSLATION_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE, "Translation is not configured on this server"),
+    TRANSLATION_FAILED(HttpStatus.BAD_GATEWAY, "Translation failed: %s"),
     OIDC_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token from OIDC provider: %s"),
     OIDC_ONLY_MODE(HttpStatus.FORBIDDEN, "Local login is disabled. Use OIDC to sign in."),
     OIDC_INVALID_REDIRECT_URI(HttpStatus.BAD_REQUEST, "Invalid redirect URI"),

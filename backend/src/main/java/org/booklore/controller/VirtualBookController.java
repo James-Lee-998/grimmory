@@ -49,13 +49,13 @@ public class VirtualBookController {
                     + "Falls back to other mirrors with the same format if the selected one fails.",
             operationId = "virtualBookDownload"
     )
-    @PostMapping("/{virtualBookId}/download")
+    @PostMapping("/{id}/download")
     @PreAuthorize("@securityUtil.canUpload() or @securityUtil.isAdmin()")
-    public ResponseEntity<TaskCreateResponse> download(@PathVariable Long virtualBookId, @RequestBody DownloadRequest request) {
+    public ResponseEntity<TaskCreateResponse> download(@PathVariable Long id, @RequestBody DownloadRequest request) {
         TaskCreateRequest taskRequest = TaskCreateRequest.builder()
                 .taskType(TaskType.DOWNLOAD_VIRTUAL_BOOK)
                 .options(VirtualBookDownloadOptions.builder()
-                        .virtualBookId(virtualBookId)
+                        .virtualBookRefId(id)
                         .mirrorId(request.mirrorId())
                         .libraryPathId(request.libraryPathId())
                         .build())

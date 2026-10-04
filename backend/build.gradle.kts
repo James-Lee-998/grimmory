@@ -161,6 +161,7 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.tukaani:xz:1.12") // Required by commons-compress for 7z support
     implementation("org.apache.commons:commons-text:1.15.0")
+    implementation("org.apache.commons:commons-csv:1.14.1")
 
     // --- MIME Detection ---
     implementation("org.apache.tika:tika-core:4.0.0")

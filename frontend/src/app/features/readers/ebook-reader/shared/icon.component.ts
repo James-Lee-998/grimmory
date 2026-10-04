@@ -51,7 +51,8 @@ export type ReaderIconName =
   | 'dots-horizontal'
   | 'zoom-in'
   | 'zoom-out'
-  | 'save';
+  | 'save'
+  | 'translate';
 
 interface IconPath {
   d: string;
@@ -296,6 +297,15 @@ const ICONS: Record<ReaderIconName, IconPath[]> = {
     {d: 'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'},
     {d: 'M17 21v-8H7v8'},
     {d: 'M7 3v5h8'}
+  ],
+  // Lucide "languages"
+  'translate': [
+    {d: 'm5 8 6 6'},
+    {d: 'm4 14 6-6 2-3'},
+    {d: 'M2 5h12'},
+    {d: 'M7 2h1'},
+    {d: 'm22 22-5-10-5 10'},
+    {d: 'M14 18h6'}
   ]
 };
 

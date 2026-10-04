@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VirtualBookDownloadOptions {
 
-    private Long virtualBookId;
+    /** The virtual_books.id of the book to download (not the provider's ID). */
+    private Long virtualBookRefId;
     private Long mirrorId;
     private Long libraryPathId;
 }

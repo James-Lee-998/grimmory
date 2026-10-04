@@ -35,8 +35,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -72,9 +70,9 @@ public class BookMaterializationService {
      * Downloads the selected mirror into the given library path. If the selected mirror fails, other mirrors
      * with the same format are tried in order of quality score.
      */
-    public Book materialize(Long virtualBookId, Long mirrorId, Long libraryPathId) {
-        VirtualBookEntity virtualBook = virtualBookRepository.findByVirtualBookId(virtualBookId)
-                .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Virtual book not found: " + virtualBookId));
+    public Book materialize(Long id, Long mirrorId, Long libraryPathId) {
+        VirtualBookEntity virtualBook = virtualBookRepository.findById(id)
+                .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Virtual book not found: " + id));
 
         List<VirtualBookMirror> candidates = orderMirrors(virtualBook, mirrorId);
         Path downloaded = downloadFirstAvailable(candidates);
@@ -90,7 +88,7 @@ public class BookMaterializationService {
         VirtualBookMirror selected = virtualBook.getMirrors().stream()
                 .filter(m -> m.getId().equals(mirrorId))
                 .findFirst()
-                .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Mirror " + mirrorId + " not found for virtual book " + virtualBook.getVirtualBookId()));
+                .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Mirror " + mirrorId + " not found for virtual book " + virtualBook.getId()));
 
         List<VirtualBookMirror> ordered = new ArrayList<>();
         ordered.add(selected);
@@ -146,7 +144,7 @@ public class BookMaterializationService {
             Files.copy(downloaded, target, StandardCopyOption.REPLACE_EXISTING);
 
             return transactionTemplate.execute(status ->
-                    processDownloadedFile(virtualBook.getVirtualBookId(), target, fileType, libraryId, libraryPathId));
+                    processDownloadedFile(virtualBook.getId(), target, fileType, libraryId, libraryPathId));
         } catch (IOException | RuntimeException e) {
             deleteQuietly(target);
             if (e instanceof RuntimeException re) {
@@ -160,14 +158,14 @@ public class BookMaterializationService {
         }
     }
 
-    private Book processDownloadedFile(Long virtualBookId, Path target, BookFileType fileType, Long libraryId, Long libraryPathId) {
+    private Book processDownloadedFile(Long id, Path target, BookFileType fileType, Long libraryId, Long libraryPathId) {
         // Reload inside this transaction so the file processor works with managed entities.
         LibraryEntity library = libraryRepository.findByIdWithPaths(libraryId)
                 .orElseThrow(() -> ApiError.LIBRARY_NOT_FOUND.createException(libraryId));
         LibraryPathEntity libraryPath = libraryPathRepository.findById(libraryPathId)
                 .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Library path not found: " + libraryPathId));
-        VirtualBookEntity virtualBook = virtualBookRepository.findByVirtualBookId(virtualBookId)
-                .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Virtual book not found: " + virtualBookId));
+        VirtualBookEntity virtualBook = virtualBookRepository.findById(id)
+                .orElseThrow(() -> ApiError.GENERIC_NOT_FOUND.createException("Virtual book not found: " + id));
 
         LibraryFile libraryFile = LibraryFile.builder()
                 .libraryEntity(library)
@@ -200,7 +198,7 @@ public class BookMaterializationService {
         eventPublisher.publishEvent(new BookAddedEvent(result.getBook()));
         notificationService.sendMessage(Topic.BOOK_ADD, result.getBook());
 
-        log.info("Materialized virtual book {} as book {} in library '{}'", virtualBookId, bookId, library.getName());
+        log.info("Materialized virtual book {} as book {} in library '{}'", id, bookId, library.getName());
         return result.getBook();
     }
 
@@ -210,7 +208,8 @@ public class BookMaterializationService {
                 .authors(splitAuthors(virtualBook.getAuthors()))
                 .description(virtualBook.getSummary())
                 .language(virtualBook.getLanguage())
-                .publishedDate(parseIssuedDate(virtualBook.getIssuedDate()))
+                // No published date: issuedDate is when the provider released the file (e.g. Gutenberg's posting
+                // date), not when the book was written. The date embedded in the file, if any, is kept.
                 .build();
     }
 
@@ -218,27 +217,11 @@ public class BookMaterializationService {
         if (authors == null || authors.isBlank()) {
             return null;
         }
-        return Arrays.stream(authors.split("[;,]"))
+        // Split on ';' only: authors are often "Last, First", so commas belong to a single name.
+        return Arrays.stream(authors.split(";"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-    }
-
-    private static LocalDate parseIssuedDate(String issuedDate) {
-        if (issuedDate == null || issuedDate.isBlank()) {
-            return null;
-        }
-        String value = issuedDate.trim();
-        try {
-            return LocalDate.parse(value);
-        } catch (DateTimeParseException ignored) {
-            // fall through to year-only
-        }
-        if (value.matches("\\d{4}")) {
-            return LocalDate.of(Integer.parseInt(value), 1, 1);
-        }
-        log.debug("Ignoring unparseable issued date '{}'", issuedDate);
-        return null;
     }
 
     private static String buildFileName(VirtualBookEntity book, String extension) {
@@ -246,7 +229,7 @@ public class BookMaterializationService {
         if (safeTitle.length() > MAX_FILE_NAME_LENGTH) {
             safeTitle = safeTitle.substring(0, MAX_FILE_NAME_LENGTH).trim();
         }
-        return safeTitle + " [" + book.getVirtualBookId() + "]." + extension;
+        return safeTitle + " [vb-" + book.getId() + "]." + extension;
     }
 
     private static String extensionOf(Path file) {

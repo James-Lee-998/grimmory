@@ -26,8 +26,8 @@ public class VirtualBookDownloadTask implements Task {
             throw ApiError.PERMISSION_DENIED.createException(UserPermission.CAN_UPLOAD);
         }
         VirtualBookDownloadOptions options = request.getOptionsAs(VirtualBookDownloadOptions.class);
-        if (options == null || options.getVirtualBookId() == null || options.getMirrorId() == null || options.getLibraryPathId() == null) {
-            throw ApiError.GENERIC_BAD_REQUEST.createException("virtualBookId, mirrorId and libraryPathId are required");
+        if (options == null || options.getVirtualBookRefId() == null || options.getMirrorId() == null || options.getLibraryPathId() == null) {
+            throw ApiError.GENERIC_BAD_REQUEST.createException("virtualBookRefId, mirrorId and libraryPathId are required");
         }
     }
 
@@ -38,7 +38,7 @@ public class VirtualBookDownloadTask implements Task {
         long startTime = System.currentTimeMillis();
         log.info("{}: Task started. TaskId: {}, Options: {}", getTaskType(), request.getTaskId(), options);
 
-        bookMaterializationService.materialize(options.getVirtualBookId(), options.getMirrorId(), options.getLibraryPathId());
+        bookMaterializationService.materialize(options.getVirtualBookRefId(), options.getMirrorId(), options.getLibraryPathId());
 
         log.info("{}: Task completed. Duration: {} ms", getTaskType(), System.currentTimeMillis() - startTime);
 

@@ -21,6 +21,17 @@ app:
     groups-delimiter: ${REMOTE_AUTH_GROUPS_DELIMITER:\\s+}
   disk-type: ${DISK_TYPE:LOCAL}
 
+  translation:
+    # LibreTranslate server used by the reader's "Translate" action. Leave blank to disable translation.
+    # Selected text is sent to this server, so point it at a self-hosted instance for privacy.
+    libretranslate-url: ${LIBRETRANSLATE_URL:}
+    libretranslate-api-key: ${LIBRETRANSLATE_API_KEY:}
+
+  virtual-book-seed:
+    # Seeds virtual books from a Project Gutenberg catalog CSV on startup. Only books not already present are inserted.
+    enabled: ${VIRTUAL_BOOK_SEED_ENABLED:true}
+    location: ${VIRTUAL_BOOK_SEED_LOCATION:classpath:seed/gutenberg-catalog.csv.gz}
+
   oidc:
     force-disable: ${FORCE_DISABLE_OIDC:false}
     allow-unsafe-hosts: ${OIDC_ALLOW_UNSAFE_HOSTS:false} # If enabled, turn off outbound SSRF filtering

@@ -1,5 +1,6 @@
 <ng-container *transloco="let t">
-  <div class="flex flex-col gap-4 p-4">
+  <!-- app-page opts this route into the shell's scrolling (see assets/styles/page.scss). -->
+  <div class="app-page">
 
     <header class="flex flex-col gap-1 border-b border-border/50 pb-4">
       <h2 class="m-0 flex items-center gap-2 text-lg font-semibold text-text">
@@ -39,9 +40,12 @@
     } @else if (books().length === 0) {
       <p class="py-16 text-center text-sm text-text-muted">{{ t('virtualBooks.empty') }}</p>
     } @else {
-      <div class="overflow-x-auto rounded-lg border border-border">
+      <!-- The list scrolls inside this box so search, destination and paging stay on screen. -->
+      <div
+        #tableScroller
+        class="max-h-[70dvh] min-h-64 overflow-auto overscroll-contain rounded-lg border border-border">
         <table class="min-w-full border-separate border-spacing-0 text-sm text-text" [class.opacity-60]="loading()">
-          <thead>
+          <thead class="sticky top-0 z-10 bg-card">
             <tr class="text-left text-[13px] text-text-secondary">
               <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colTitle') }}</th>
               <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colAuthors') }}</th>
@@ -52,7 +56,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (book of books(); track book.virtualBookId) {
+            @for (book of books(); track book.id) {
               <tr class="align-middle">
                 <td class="border-b border-border/50 px-3 py-2 font-medium" [attr.title]="book.summary || null">{{ book.title }}</td>
                 <td class="border-b border-border/50 px-3 py-2 text-text-secondary">{{ book.authors || '—' }}</td>
@@ -80,7 +84,7 @@
                       size="sm"
                       tone="primary"
                       [label]="t('virtualBooks.download')"
-                      [loading]="submitting() === book.virtualBookId"
+                      [loading]="submitting() === book.id"
                       [disabled]="!canDownload(book)"
                       (clicked)="download(book)">
                       <svg appIcon="download" aria-hidden="true"></svg>
@@ -93,12 +97,42 @@
         </table>
       </div>
 
-      <div class="flex items-center justify-between gap-3 text-sm text-text-muted">
-        <span>{{ t('virtualBooks.pageInfo', {page: pageIndex() + 1, pages: totalPages(), total: totalElements()}) }}</span>
-        <div class="flex gap-2">
-          <app-button size="sm" [label]="t('virtualBooks.previous')" [disabled]="pageIndex() === 0" (clicked)="goToPage(pageIndex() - 1)" />
-          <app-button size="sm" [label]="t('virtualBooks.next')" [disabled]="pageIndex() + 1 >= totalPages()" (clicked)="goToPage(pageIndex() + 1)" />
+      <div class="flex flex-col gap-3 text-sm text-text-muted lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex items-center gap-3">
+          <span>{{ t('virtualBooks.pageInfo', {page: pageIndex() + 1, pages: totalPages(), total: totalElements()}) }}</span>
+          <span class="flex items-center gap-2 whitespace-nowrap">
+            {{ t('virtualBooks.pageSize') }}
+            <span class="w-20">
+              <app-select
+                size="sm"
+                [options]="pageSizeOptions"
+                [value]="pageSize()"
+                (valueChange)="setPageSize($event)"
+                [ariaLabel]="t('virtualBooks.pageSize')" />
+            </span>
+          </span>
         </div>
+
+        <nav class="flex flex-wrap items-center gap-1" [attr.aria-label]="t('virtualBooks.pagination')">
+          <app-button size="sm" variant="ghost" [label]="t('virtualBooks.first')" [disabled]="pageIndex() === 0" (clicked)="goToPage(0)" />
+          <app-button size="sm" variant="ghost" [label]="t('virtualBooks.previous')" [disabled]="pageIndex() === 0" (clicked)="goToPage(pageIndex() - 1)" />
+          @for (page of pageButtons(); track $index) {
+            @if (page === null) {
+              <span class="px-1" aria-hidden="true">…</span>
+            } @else {
+              <app-button
+                size="sm"
+                [variant]="page === pageIndex() ? 'solid' : 'ghost'"
+                [tone]="page === pageIndex() ? 'primary' : 'neutral'"
+                [label]="'' + (page + 1)"
+                [ariaLabel]="t('virtualBooks.goToPage', {page: page + 1})"
+                [ariaPressed]="page === pageIndex()"
+                (clicked)="goToPage(page)" />
+            }
+          }
+          <app-button size="sm" variant="ghost" [label]="t('virtualBooks.next')" [disabled]="pageIndex() + 1 >= totalPages()" (clicked)="goToPage(pageIndex() + 1)" />
+          <app-button size="sm" variant="ghost" [label]="t('virtualBooks.last')" [disabled]="pageIndex() + 1 >= totalPages()" (clicked)="goToPage(totalPages() - 1)" />
+        </nav>
       </div>
     }
   </div>
