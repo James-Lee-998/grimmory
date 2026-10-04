@@ -1794,6 +1794,7 @@
       "readingStats": "Reading Stats",
       "metadataManager": "Metadata Manager",
       "bookdrop": "Bookdrop",
+      "virtualBooks": "Virtual Books",
       "createLibrary": "Create Library",
       "uploadBook": "Upload Book",
       "documentation": "Documentation",
@@ -1910,6 +1911,32 @@
       "complete": "Library Loading Complete!",
       "openLibrary": "Open Library"
     }
+  },
+  "virtualBooks": {
+    "pageTitle": "Virtual Books",
+    "pageDescription": "Books available from external mirrors. Pick a mirror and a destination to add one to your library.",
+    "searchPlaceholder": "Search by title or author",
+    "destination": "Download to",
+    "destinationPlaceholder": "Choose a library folder",
+    "noDestinations": "No library folders yet. Create a library first.",
+    "mirrorPlaceholder": "Choose a mirror",
+    "noMirrors": "No mirrors",
+    "mirrorOption": "{{ format }} · {{ provider }} (score {{ score }})",
+    "colTitle": "Title",
+    "colAuthors": "Authors",
+    "colLanguage": "Language",
+    "colIssued": "Issued",
+    "colMirror": "Mirror",
+    "download": "Download",
+    "downloaded": "In library",
+    "empty": "No virtual books found.",
+    "loadError": "Could not load virtual books.",
+    "queuedSummary": "Download started",
+    "queuedDetail": "\"{{ title }}\" is downloading. It will appear in your library when it finishes.",
+    "queueErrorSummary": "Download failed to start",
+    "pageInfo": "Page {{ page }} of {{ pages }} · {{ total }} books",
+    "previous": "Previous",
+    "next": "Next"
   },
   "bookdrop": {
     "bulkEdit": {

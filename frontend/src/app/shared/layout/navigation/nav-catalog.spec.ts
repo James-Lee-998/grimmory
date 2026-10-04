@@ -55,6 +55,8 @@ describe('nav-catalog', () => {
     expect(findPageNavItem('bookdrop', translate, { canAccessBookdrop: true })?.id).toBe('bookdrop');
     expect(findPageNavItem('metadataManager', translate, { canManageLibrary: true })).toBeNull();
     expect(findPageNavItem('metadataManager', translate, { canEditMetadata: true })?.id).toBe('metadataManager');
+    expect(findPageNavItem('virtualBooks', translate, {})).toBeNull();
+    expect(findPageNavItem('virtualBooks', translate, { canUpload: true })?.id).toBe('virtualBooks');
     expect(findPageNavItem('unknown', translate, {})).toBeNull();
   });
 

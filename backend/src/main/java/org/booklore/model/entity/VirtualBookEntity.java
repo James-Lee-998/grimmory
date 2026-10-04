@@ -51,6 +51,9 @@ public class VirtualBookEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "summary", nullable = true, columnDefinition = "TEXT")
+    private String summary;
+
     @Builder.Default
     @OneToMany(mappedBy = "virtualBookEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<VirtualBookMirror> mirrors = new ArrayList<>();

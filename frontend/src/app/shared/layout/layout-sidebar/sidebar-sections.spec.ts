@@ -82,6 +82,12 @@ describe('buildToolsSection', () => {
       'bookdrop',
     ]);
   });
+
+  it('includes virtual books for users who can upload', () => {
+    const [section] = buildToolsSection(translate, { canUpload: true });
+
+    expect(section.items.map((item) => item.id)).toEqual(['virtualBooks']);
+  });
 });
 
 describe('buildLibrarySection', () => {

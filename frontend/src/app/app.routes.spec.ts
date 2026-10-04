@@ -3,6 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {routes} from './app.routes';
 import {AuthChildGuard, AuthGuard} from './core/security/auth.guard';
 import {BookdropGuard} from './core/security/guards/bookdrop.guard';
+import {VirtualBooksGuard} from './core/security/guards/virtual-books.guard';
 import {EditMetadataGuard} from './core/security/guards/edit-metdata.guard';
 import {LibraryStatsGuard} from './core/security/guards/library-stats.guard';
 import {UserStatsGuard} from './core/security/guards/user-stats.guard';
@@ -31,7 +32,7 @@ describe('app routes', () => {
     const browseFilterPage = (path: string) => children.find(route => route.path === path)
       ?.children?.find(route => route.path === 'filter');
 
-    expect(children).toHaveLength(21);
+    expect(children).toHaveLength(22);
     expect(children.find(route => route.path === 'browse/filter')).toBeUndefined();
     expect(shellRoute?.canActivateChild).toEqual([AuthChildGuard]);
     expect(children.find(route => route.path === 'dashboard')?.canActivate).toBeUndefined();
@@ -56,6 +57,7 @@ describe('app routes', () => {
     const children = shellRoute?.children ?? [];
 
     expect(children.find(route => route.path === 'bookdrop')?.canActivate).toEqual([BookdropGuard]);
+    expect(children.find(route => route.path === 'virtual-books')?.canActivate).toEqual([VirtualBooksGuard]);
     expect(children.find(route => route.path === 'metadata-manager')?.canActivate).toEqual([EditMetadataGuard]);
     expect(children.find(route => route.path === 'library-stats')?.canActivate).toEqual([LibraryStatsGuard]);
     expect(children.find(route => route.path === 'reading-stats')?.canActivate).toEqual([UserStatsGuard]);

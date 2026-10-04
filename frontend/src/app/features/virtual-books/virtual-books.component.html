@@ -1,0 +1,105 @@
+<ng-container *transloco="let t">
+  <div class="flex flex-col gap-4 p-4">
+
+    <header class="flex flex-col gap-1 border-b border-border/50 pb-4">
+      <h2 class="m-0 flex items-center gap-2 text-lg font-semibold text-text">
+        <svg appIcon="cloud-download" class="size-5" aria-hidden="true"></svg>
+        {{ t('virtualBooks.pageTitle') }}
+      </h2>
+      <p class="m-0 text-sm text-text-muted">{{ t('virtualBooks.pageDescription') }}</p>
+    </header>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div class="w-full sm:max-w-sm">
+        <app-input
+          [value]="search()"
+          (valueChange)="onSearchChange($event)"
+          [placeholder]="t('virtualBooks.searchPlaceholder')"
+          [ariaLabel]="t('virtualBooks.searchPlaceholder')" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:ml-auto sm:max-w-md">
+        <span class="text-[13px] font-semibold text-text-secondary">{{ t('virtualBooks.destination') }}</span>
+        @if (destinationOptions().length > 0) {
+          <app-select
+            [options]="destinationOptions()"
+            [value]="selectedDestination()"
+            (valueChange)="libraryPathId.set($event)"
+            [placeholder]="t('virtualBooks.destinationPlaceholder')"
+            [ariaLabel]="t('virtualBooks.destination')" />
+        } @else {
+          <span class="text-sm text-text-muted">{{ t('virtualBooks.noDestinations') }}</span>
+        }
+      </div>
+    </div>
+
+    @if (loading() && !result()) {
+      <div class="flex justify-center py-16"><app-spinner /></div>
+    } @else if (loadError()) {
+      <p class="py-16 text-center text-sm text-text-muted">{{ t('virtualBooks.loadError') }}</p>
+    } @else if (books().length === 0) {
+      <p class="py-16 text-center text-sm text-text-muted">{{ t('virtualBooks.empty') }}</p>
+    } @else {
+      <div class="overflow-x-auto rounded-lg border border-border">
+        <table class="min-w-full border-separate border-spacing-0 text-sm text-text" [class.opacity-60]="loading()">
+          <thead>
+            <tr class="text-left text-[13px] text-text-secondary">
+              <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colTitle') }}</th>
+              <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colAuthors') }}</th>
+              <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colLanguage') }}</th>
+              <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colIssued') }}</th>
+              <th class="border-b border-border px-3 py-2 font-semibold">{{ t('virtualBooks.colMirror') }}</th>
+              <th class="border-b border-border px-3 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (book of books(); track book.virtualBookId) {
+              <tr class="align-middle">
+                <td class="border-b border-border/50 px-3 py-2 font-medium" [attr.title]="book.summary || null">{{ book.title }}</td>
+                <td class="border-b border-border/50 px-3 py-2 text-text-secondary">{{ book.authors || '—' }}</td>
+                <td class="border-b border-border/50 px-3 py-2 uppercase text-text-secondary">{{ book.language || '—' }}</td>
+                <td class="border-b border-border/50 px-3 py-2 text-text-secondary">{{ book.issuedDate || '—' }}</td>
+                <td class="min-w-64 border-b border-border/50 px-3 py-2">
+                  @if (book.mirrors.length > 0) {
+                    <app-select
+                      size="sm"
+                      [options]="mirrorOptions(book)"
+                      [value]="selectedMirror(book)"
+                      (valueChange)="setMirror(book, $event)"
+                      [disabled]="book.downloaded"
+                      [placeholder]="t('virtualBooks.mirrorPlaceholder')"
+                      [ariaLabel]="t('virtualBooks.colMirror')" />
+                  } @else {
+                    <span class="text-text-muted">{{ t('virtualBooks.noMirrors') }}</span>
+                  }
+                </td>
+                <td class="whitespace-nowrap border-b border-border/50 px-3 py-2 text-right">
+                  @if (book.downloaded) {
+                    <span class="text-sm text-text-muted">{{ t('virtualBooks.downloaded') }}</span>
+                  } @else {
+                    <app-button
+                      size="sm"
+                      tone="primary"
+                      [label]="t('virtualBooks.download')"
+                      [loading]="submitting() === book.virtualBookId"
+                      [disabled]="!canDownload(book)"
+                      (clicked)="download(book)">
+                      <svg appIcon="download" aria-hidden="true"></svg>
+                    </app-button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 text-sm text-text-muted">
+        <span>{{ t('virtualBooks.pageInfo', {page: pageIndex() + 1, pages: totalPages(), total: totalElements()}) }}</span>
+        <div class="flex gap-2">
+          <app-button size="sm" [label]="t('virtualBooks.previous')" [disabled]="pageIndex() === 0" (clicked)="goToPage(pageIndex() - 1)" />
+          <app-button size="sm" [label]="t('virtualBooks.next')" [disabled]="pageIndex() + 1 >= totalPages()" (clicked)="goToPage(pageIndex() + 1)" />
+        </div>
+      </div>
+    }
+  </div>
+</ng-container>

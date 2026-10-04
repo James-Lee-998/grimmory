@@ -11,6 +11,7 @@ import {OidcCallbackComponent} from './core/security/oidc-callback/oidc-callback
 import {MainDashboardComponent} from './features/dashboard/components/main-dashboard/main-dashboard.component';
 import {LoginGuard} from './shared/components/setup/login.guard';
 import {BookdropGuard} from './core/security/guards/bookdrop.guard';
+import {VirtualBooksGuard} from './core/security/guards/virtual-books.guard';
 import {LibraryStatsGuard} from './core/security/guards/library-stats.guard';
 import {UserStatsGuard} from './core/security/guards/user-stats.guard';
 import {EditMetadataGuard} from './core/security/guards/edit-metdata.guard';
@@ -57,6 +58,7 @@ export const routes: Routes = [
       {path: 'magic-shelf/:magicShelfId/books', canActivateChild: [validBookBrowseScope], children: bookBrowseRoutes()},
       {path: 'book/:bookId', loadComponent: () => import('./features/metadata/component/book-metadata-center/book-metadata-center.component').then(m => m.BookMetadataCenterComponent)},
       {path: 'bookdrop', loadComponent: () => import('./features/bookdrop/component/bookdrop-file-review/bookdrop-file-review.component').then(m => m.BookdropFileReviewComponent), canActivate: [BookdropGuard]},
+      {path: 'virtual-books', loadComponent: () => import('./features/virtual-books/virtual-books.component').then(m => m.VirtualBooksComponent), canActivate: [VirtualBooksGuard]},
       {path: 'metadata-manager', loadComponent: () => import('./features/metadata/component/metadata-manager/metadata-manager.component').then(m => m.MetadataManagerComponent), canActivate: [EditMetadataGuard]},
       {path: 'library-stats', loadComponent: () => import('./features/stats/component/library-stats/library-stats.component').then(m => m.LibraryStatsComponent), canActivate: [LibraryStatsGuard]},
       {path: 'reading-stats', loadComponent: () => import('./features/stats/component/user-stats/user-stats.component').then(m => m.UserStatsComponent), canActivate: [UserStatsGuard]},

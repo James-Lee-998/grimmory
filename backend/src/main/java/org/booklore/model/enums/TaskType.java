@@ -58,6 +58,14 @@ public enum TaskType {
             true,
             "Refresh Metadata",
             "Updates metadata information for your selected books."
+    ),
+    DOWNLOAD_VIRTUAL_BOOK(
+            true,
+            true,
+            false,
+            true,
+            "Download Virtual Book",
+            "Downloads a virtual book from the selected mirror and adds it to a library."
     );
 
     @Getter

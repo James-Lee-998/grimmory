@@ -131,6 +131,13 @@ const SECONDARY_PAGE_DEFINITIONS: readonly PageDefinition[] = [
     routerLink: ['/bookdrop'],
     isVisible: canAccessBookdrop,
   },
+  {
+    id: 'virtualBooks',
+    labelKey: 'layout.menu.virtualBooks',
+    icon: 'cloud-download',
+    routerLink: ['/virtual-books'],
+    isVisible: canUploadBooks,
+  },
 ] as const;
 
 const CREATE_ACTION_DEFINITIONS: readonly ActionDefinition[] = [

@@ -20,5 +20,4 @@ public interface VirtualBookRepository extends JpaRepository<VirtualBookEntity, 
         String authorKeyword,
         Pageable pageable
     );
-
 }
